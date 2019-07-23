@@ -12,7 +12,7 @@ defmodule Canvas do
     light_red: &IO.ANSI.light_red_background/0,
     light_white: &IO.ANSI.light_white_background/0,
     light_yellow: &IO.ANSI.light_yellow_background/0,
-    magenta: &IO.ANSI._magenta_background/0,
+    magenta: &IO.ANSI.magenta_background/0,
     red: &IO.ANSI.red_background/0,
     white: &IO.ANSI.white_background/0,
     yellow: &IO.ANSI.yellow_background/0
