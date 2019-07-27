@@ -22,11 +22,11 @@ defmodule Canvas do
 
   defstruct cells: %{}, row_count: 0, column_count: 0
 
-  defguardp is_in_canvas(row_count, column_count, row, column)
+  defguardp in_canvas?(row_count, column_count, row, column)
             when row > 0 and row <= row_count and column > 0 and
                    column <= column_count
 
-  defguardp is_allowed_colour(colour) when colour in @allowed_colours
+  defguardp allow_colour?(colour) when colour in @allowed_colours
 
   def new(row_count, column_count) do
     %Canvas{row_count: row_count, column_count: column_count}
@@ -38,8 +38,8 @@ defmodule Canvas do
         column,
         colour
       )
-      when is_in_canvas(row_count, column_count, row, column) and
-             is_allowed_colour(colour) do
+      when in_canvas?(row_count, column_count, row, column) and
+             allow_colour?(colour) do
     new_cells = Map.put(cells, {row, column}, colour)
     %{canvas | cells: new_cells}
   end
@@ -51,9 +51,9 @@ defmodule Canvas do
         to_column,
         colour
       )
-      when is_in_canvas(row_count, column_count, row, from_column) and
-             is_in_canvas(row_count, column_count, row, to_column) and
-             is_allowed_colour(colour) do
+      when in_canvas?(row_count, column_count, row, from_column) and
+             in_canvas?(row_count, column_count, row, to_column) and
+             allow_colour?(colour) do
     from_column..to_column
     |> Enum.reduce(canvas, fn column, canvas -> draw_in_cell(canvas, row, column, colour) end)
   end
@@ -65,8 +65,8 @@ defmodule Canvas do
         to_row,
         colour
       )
-      when is_in_canvas(row_count, column_count, from_row, column) and
-             is_in_canvas(row_count, column_count, to_row, column) and is_allowed_colour(colour) do
+      when in_canvas?(row_count, column_count, from_row, column) and
+             in_canvas?(row_count, column_count, to_row, column) and allow_colour?(colour) do
     from_row..to_row
     |> Enum.reduce(canvas, fn row, canvas -> draw_in_cell(canvas, row, column, colour) end)
   end
@@ -77,7 +77,7 @@ defmodule Canvas do
         column,
         new_colour
       )
-      when is_in_canvas(row_count, column_count, row, column) and is_allowed_colour(new_colour) do
+      when in_canvas?(row_count, column_count, row, column) and allow_colour?(new_colour) do
     visited = MapSet.new()
     original_colour = Map.get(canvas.cells, {row, column})
     {new_canvas, _} = flood(canvas, row, column, original_colour, new_colour, visited)
@@ -92,7 +92,7 @@ defmodule Canvas do
          new_colour,
          visited
        )
-       when is_in_canvas(row_count, column_count, row, column) and is_allowed_colour(new_colour) do
+       when in_canvas?(row_count, column_count, row, column) and allow_colour?(new_colour) do
     cond do
       MapSet.member?(visited, {row, column}) ->
         {canvas, visited}
@@ -130,7 +130,7 @@ defmodule Canvas do
          new_colour,
          visited
        )
-       when is_allowed_colour(new_colour) do
+       when allow_colour?(new_colour) do
     {canvas, visited}
   end
 
