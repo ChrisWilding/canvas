@@ -20,6 +20,8 @@ defmodule Canvas do
   @allowed_colours Map.keys(@colour_to_ansi_fn)
   @default_colour :red
 
+  @typep cells_t :: %{optional({pos_integer, pos_integer}) => atom}
+  @type t :: %Canvas{cells: cells_t, row_count: pos_integer, column_count: pos_integer}
   defstruct cells: %{}, row_count: 0, column_count: 0
 
   defguardp in_canvas?(row_count, column_count, row, column)
@@ -28,10 +30,12 @@ defmodule Canvas do
 
   defguardp allow_colour?(colour) when colour in @allowed_colours
 
+  @spec new(pos_integer, atom) :: Canvas.t()
   def new(row_count, column_count) do
     %Canvas{row_count: row_count, column_count: column_count}
   end
 
+  @spec draw_in_cell(Canvas.t(), pos_integer, pos_integer, atom) :: Canvas.t()
   def draw_in_cell(
         %Canvas{cells: cells, row_count: row_count, column_count: column_count} = canvas,
         row,
@@ -44,6 +48,7 @@ defmodule Canvas do
     %{canvas | cells: new_cells}
   end
 
+  @spec draw_in_row(Canvas.t(), pos_integer, pos_integer, pos_integer, atom) :: Canvas.t()
   def draw_in_row(
         %Canvas{row_count: row_count, column_count: column_count} = canvas,
         row,
@@ -58,6 +63,7 @@ defmodule Canvas do
     |> Enum.reduce(canvas, fn column, canvas -> draw_in_cell(canvas, row, column, colour) end)
   end
 
+  @spec draw_in_column(Canvas.t(), pos_integer, pos_integer, pos_integer, atom) :: Canvas.t()
   def draw_in_column(
         %Canvas{row_count: row_count, column_count: column_count} = canvas,
         column,
@@ -71,6 +77,7 @@ defmodule Canvas do
     |> Enum.reduce(canvas, fn row, canvas -> draw_in_cell(canvas, row, column, colour) end)
   end
 
+  @spec flood(Canvas.t(), pos_integer, pos_integer, atom) :: Canvas.t()
   def flood(
         %Canvas{row_count: row_count, column_count: column_count} = canvas,
         row,
