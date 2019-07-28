@@ -100,45 +100,27 @@ defmodule Canvas do
          visited
        )
        when in_canvas?(row_count, column_count, row, column) and allow_colour?(new_colour) do
-    cond do
-      MapSet.member?(visited, {row, column}) ->
-        {canvas, visited}
+    if Map.get(cells, {row, column}) !== original_colour do
+      {canvas, visited}
+    else
+      new_visited = MapSet.put(visited, {row, column})
+      new_canvas = draw_in_cell(canvas, row, column, new_colour)
 
-      Map.get(cells, {row, column}) !== original_colour ->
-        {canvas, visited}
+      next_cells =
+        [
+          {row - 1, column},
+          {row + 1, column},
+          {row, column - 1},
+          {row, column + 1}
+        ]
+        |> Enum.filter(&(!MapSet.member?(new_visited, &1)))
+        |> Enum.filter(fn {row, column} -> in_canvas?(row_count, column_count, row, column) end)
 
-      true ->
-        new_visited = MapSet.put(visited, {row, column})
-        new_canvas = draw_in_cell(canvas, row, column, new_colour)
-
-        next_cells =
-          Enum.filter(
-            [
-              {row - 1, column},
-              {row + 1, column},
-              {row, column - 1},
-              {row, column + 1}
-            ],
-            &(!MapSet.member?(new_visited, &1))
-          )
-
-        Enum.reduce(next_cells, {new_canvas, new_visited}, fn {next_row, next_column},
-                                                              {new_canvas, new_visited} ->
-          flood(new_canvas, next_row, next_column, original_colour, new_colour, new_visited)
-        end)
+      Enum.reduce(next_cells, {new_canvas, new_visited}, fn {next_row, next_column},
+                                                            {new_canvas, new_visited} ->
+        flood(new_canvas, next_row, next_column, original_colour, new_colour, new_visited)
+      end)
     end
-  end
-
-  defp flood(
-         %Canvas{} = canvas,
-         _row,
-         _column,
-         _original_colour,
-         new_colour,
-         visited
-       )
-       when allow_colour?(new_colour) do
-    {canvas, visited}
   end
 
   def draw(%Canvas{cells: cells, row_count: row_count, column_count: column_count}) do
