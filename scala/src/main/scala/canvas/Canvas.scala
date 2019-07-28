@@ -33,7 +33,7 @@ case class Canvas(cells: mutable.Map[(Int, Int), Colour], rowCount: Int, columnC
         val originalColour = cells.getOrElse(row -> column, Black)
 
         def doFlood(row: Int, column: Int, originalColour: Colour, newColour: Colour, visited: Set[(Int, Int)]): Set[(Int, Int)] = {
-            if (visited.contains(row -> column) || !cells.get(row -> column).contains(originalColour)) {
+            if (!cells.get(row -> column).contains(originalColour)) {
                 visited
             } else {
                 val newVisited = visited + (row -> column)
