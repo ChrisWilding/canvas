@@ -14,11 +14,12 @@ defmodule Canvas do
     light_yellow: &IO.ANSI.light_yellow_background/0,
     magenta: &IO.ANSI.magenta_background/0,
     red: &IO.ANSI.red_background/0,
+    reset: &IO.ANSI.reset/0,
     white: &IO.ANSI.white_background/0,
     yellow: &IO.ANSI.yellow_background/0
   }
   @allowed_colours Map.keys(@colour_to_ansi_fn)
-  @default_colour :red
+  @reset :reset
 
   @typep cells_t :: %{optional({pos_integer, pos_integer}) => atom}
   @type t :: %Canvas{cells: cells_t, row_count: pos_integer, column_count: pos_integer}
@@ -106,7 +107,7 @@ defmodule Canvas do
       new_visited = MapSet.put(visited, {row, column})
       new_canvas = draw_in_cell(canvas, row, column, new_colour)
 
-      next_cells =
+      adjacent_cells =
         [
           {row - 1, column},
           {row + 1, column},
@@ -116,8 +117,8 @@ defmodule Canvas do
         |> Enum.filter(&(!MapSet.member?(new_visited, &1)))
         |> Enum.filter(fn {row, column} -> in_canvas?(row_count, column_count, row, column) end)
 
-      Enum.reduce(next_cells, {new_canvas, new_visited}, fn {next_row, next_column},
-                                                            {new_canvas, new_visited} ->
+      Enum.reduce(adjacent_cells, {new_canvas, new_visited}, fn {next_row, next_column},
+                                                                {new_canvas, new_visited} ->
         flood(new_canvas, next_row, next_column, original_colour, new_colour, new_visited)
       end)
     end
@@ -136,7 +137,7 @@ defmodule Canvas do
   end
 
   defp draw_cell(cells, row, column) do
-    colour = Map.get(cells, {row, column}, @default_colour)
+    colour = Map.get(cells, {row, column}, @reset)
     colour_fn = Map.get(@colour_to_ansi_fn, colour)
     colour_fn.() <> " "
   end
